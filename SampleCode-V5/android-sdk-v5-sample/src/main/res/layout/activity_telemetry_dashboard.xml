@@ -1,0 +1,84 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:orientation="vertical"
+    android:padding="24dp"
+    android:background="#0A1628">
+
+    <TextView
+        android:text="📡 TELEMETRY DASHBOARD"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:textSize="20sp"
+        android:textColor="#14B8A6"
+        android:textStyle="bold"
+        android:gravity="center"
+        android:paddingBottom="24dp"/>
+
+    <TextView
+        android:id="@+id/tvRCStatus"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:paddingBottom="12dp"
+        android:text="🎮 RC Connected: --"
+        android:textColor="#FFFFFF"
+        android:textSize="16sp" />
+
+    <TextView android:id="@+id/tvBattery"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="🔋 Battery: --%"
+        android:textSize="16sp"
+        android:textColor="#FFFFFF"
+        android:paddingBottom="12dp"/>
+
+    <TextView android:id="@+id/tvSignal"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="📶 Signal Quality: --%"
+        android:textSize="16sp"
+        android:textColor="#FFFFFF"
+        android:paddingBottom="12dp"/>
+
+    <TextView android:id="@+id/tvGPS"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="📍 GPS: --"
+        android:textSize="14sp"
+        android:textColor="#FFFFFF"
+        android:paddingBottom="12dp"/>
+
+    <TextView android:id="@+id/tvAttitude"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="✈️ Attitude: --"
+        android:textSize="14sp"
+        android:textColor="#FFFFFF"
+        android:paddingBottom="12dp"/>
+
+    <TextView android:id="@+id/tvPackets"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="📦 Packets Sent: 0"
+        android:textSize="16sp"
+        android:textColor="#14B8A6"
+        android:paddingBottom="12dp"/>
+
+    <TextView android:id="@+id/tvPacketLoss"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="❌ Packet Loss: 0.00%"
+        android:textSize="16sp"
+        android:textColor="#F59E0B"
+        android:paddingBottom="12dp"/>
+
+    <TextView android:id="@+id/tvBufferSize"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="💾 Buffer Size: 0 packets"
+        android:textSize="16sp"
+        android:textColor="#FFFFFF"
+        android:paddingBottom="12dp"/>
+
+</LinearLayout>

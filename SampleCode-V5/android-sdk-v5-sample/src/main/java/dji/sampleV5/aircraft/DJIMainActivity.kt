@@ -84,7 +84,7 @@ abstract class DJIMainActivity : AppCompatActivity() {
             systemUiVisibility =
                 View.SYSTEM_UI_FLAG_HIDE_NAVIGATION or View.SYSTEM_UI_FLAG_IMMERSIVE_STICKY or View.SYSTEM_UI_FLAG_FULLSCREEN or View.SYSTEM_UI_FLAG_LAYOUT_FULLSCREEN
         }
-
+        TelemetryManager.init(this) // Add here to create Telemetry_log.csv when app open
         initMSDKInfoView()
         observeSDKManager()
         checkPermissionAndRequest()
@@ -157,9 +157,13 @@ abstract class DJIMainActivity : AppCompatActivity() {
         msdkManagerVM.lvProductConnectionState.observe(this) { resultPair ->
             showToast("Product: ${resultPair.second} ,ConnectionState:  ${resultPair.first}")
             Log.d("DJI_CONNECT", "Connection fired: ${resultPair.first}")
-            if (resultPair.first == true) {
+            if (resultPair.first == false) {
                 Log.d("DJI_CONNECT", "Starting telemetry now!")
+                NetworkMonitor.start(this)
+                TelemetryManager.init(this)
                 TelemetryManager.startListening()
+                val intent = android.content.Intent(this, TelemetryDashboardActivity::class.java)
+                startActivity(intent)
             }
         }
 
