@@ -1,94 +1,92 @@
-# DJI Mobile SDK for Android V5 Latest Version 5.17.0
+ Edge-to-Cloud Telemetry Trustworthiness
+**COMP11134 Collaborative Group Project — Group 4**
 
-[中文版](README_CN.md)
+## Team
+| Name				| Role |
+|------				|------|
+| Craig Rutherford 		| System Architecture & Validation Lead |
+| Joseph Toba (Oloruntoba) 	| MSDK & App Implementation Lead |
+| Yassin Ginawi 		| Network & Transmission Lead |
 
-## What is DJI Mobile SDK V5?
+## Project Description
+An end-to-end drone telemetry pipeline that streams live state data from a DJI Mini 4 Pro
+to a remote server and measures performance under degraded network conditions.
+The emphasis is on communication resilience and reliability in BVLOS & SORA contexts.
 
-DJI Mobile SDK V5 has a series of APIs to control the software and hardware interfaces of an aircraft. We provide an open source production sample and a tutorial for developers to develop a more competitive drone solution on mobile device. This improves the experience and efficiency of MSDK App development.
+## System Architecture
 
-Supported Product:
-* [DJI Mavic 3TA]()
-* [Matrice 400]()
-* [Matrice 4D Enterprise Series]()
-* [DJI Mini4 PRO](https://www.dji.com/cn/mini-4-pro?from=store-product-page)
-* [Matrice 4 Enterprise Series](https://enterprise.dji.com/cn/matrice-4-series)
-* [H30 Series](https://enterprise.dji.com/cn/zenmuse-h30-series)
-* [DJI Mini3 Pro](https://www.dji.com/cn/mini-3-pro?site=brandsite&from=landing_page)
-* [DJI Mini3](https://www.dji.com/cn/mini-3?site=brandsite&from=landing_page)
-* [Mavic 3 Enterprise Series](https://www.dji.com/cn/mavic-3-enterprise)
-* [M30 Series](https://www.dji.com/matrice-30?site=brandsite&from=nav)
-* [M300 RTK](https://www.dji.com/matrice-300?site=brandsite&from=nav)
-* [Matrice 350 RTK](https://enterprise.dji.com/cn/matrice-350-rtk)
-* [DJI Mavic 3TA]()
+DJI Mini 4 Pro → RC-N3 Controller → Android (MSDK App) → Network → Flask Server → Analysis
 
-## Project Directory Introduction
+## Features Implemented
+- ✅ Live telemetry extraction via DJI MSDK v5 (GPS, attitude, battery)
+- ✅ Millisecond timestamping on every packet
+- ✅ Sequence numbering for packet loss detection
+- ✅ HTTP transmission to remote Flask server
+- ✅ Local CSV file saving (telemetry_log.csv)
+- ✅ Packet loss calculator
+- ✅ Local buffer during network disconnection
+- ✅ Buffer drain on reconnection with duration logging
+- ✅ RC signal quality monitoring (AirLinkKey)
+- ✅ RC disconnect/reconnect event logger (rc_events.csv)
+- ✅ Network monitor (ConnectivityManager)
+- ✅ Session summary logger
+- ✅ Live telemetry dashboard UI
 
+## KPIs
+| KPI | Threshold |
+|-----|-----------|
+| End-to-End Latency | ≤ 300ms normal, ≤ 500ms degraded |
+| Packet Loss | ≤ 2% normal, ≤ 5% degraded |
+| Reconnect Time | ≤ 15 seconds |
+| Data Completeness | ≥ 98% |
+| Buffer Recovery Success | ≥ 99% |
+
+## Project Structure
+
+SampleCode-V5/android-sdk-v5-sample/src/main/java/dji/sampleV5/aircraft/
+├── TelemetryManager.kt          # Core telemetry extraction, buffering, CSV logging
+├── NetworkMonitor.kt            # Network state detection
+├── TelemetryDashboardActivity.kt # Live telemetry UI dashboard
+└── DJIMainActivity.kt           # Main activity, SDK registration
+SampleCode-V5/android-sdk-v5-sample/src/main/res/layout/
+└── activity_telemetry_dashboard.xml  # Dashboard UI layout
+server/
+└── server.py                    # Flask server
+
+
+
+## Setup Instructions
+
+### Android App
+1. Clone the repository
+2. Copy `gradle.properties`, `local.properties` and `msdkkeystore.jks` from the original project (not committed for security)
+3. Open `SampleCode-V5/android-sdk-v5-as` in Android Studio
+4. Update the server IP in `TelemetryManager.kt` to match your server
+5. Build and run on Android device
+
+### Flask Server
+```bash
+cd server
+pip install flask
+python3 server.py
 ```
-├── Docs
-│   └── Android_API
-├── LICENSE.txt
-├── README.md
-├── README_CN.md
-└── SampleCode-V5
-    ├── android-sdk-v5-as
-    ├── android-sdk-v5-sample
-    └── android-sdk-v5-uxsdk
+Server runs on port 5000. Receives POST requests at `/telemetry`.
+
+### Pull CSV Evidence
+```bash
+adb pull /sdcard/Android/data/com.example.dronegroup/files/telemetry_log.csv
+adb pull /sdcard/Android/data/com.example.dronegroup/files/rc_events.csv
 ```
 
+## Hardware
+- DJI Mini 4 Pro Drone
+- DJI RC-N3 Controller
+- Android Device
+- Ubuntu Linux Development Machine
 
-### Software License
-
-The DJI Android SDK is dynamically linked with unmodified libraries of <a href=http://ffmpeg.org>FFmpeg</a> licensed under the <a href=https://www.gnu.org/licenses/lgpl-2.1.html.en>LGPLv2.1</a>. The source code of these FFmpeg libraries, the compilation instructions, and the LGPL v2.1 license are provided in [Github](https://github.com/dji-sdk/FFmpeg). The DJI Sample Code V5 in this repo is offered under MIT License.
-
-
-### Sample Explanation
-
-Sample can be divided into three parts:
-
-- Scenographic Example: Provides scenographic sample support of aircraft.
-- Sample Module: Offer an Airplane Sample App.
-
-For detailed configuration, please refer to [settings.gradle](SampleCode-V5/android-sdk-v5-as/settings.gradle).
-
-Scenographic Example：
-
-- uxsdk: Scenographic Example. Currently only aircraft are supported.
-
-Sample module:
-
-- sample：Compile aircraft sample App, which depends on uxsdk.
-
-## Integration
-
-For further detail on how to integrate the DJI Android SDK into your Android Studio project, please check the tutorial:
-- [Notice of Run MSDK](https://developer.dji.com/doc/mobile-sdk-tutorial/en/quick-start/user-project-caution.html)
-
-## AAR Explanation
-
-> **Notice:** sdkVersion = 5.17.0
-
-| SDK package | Explanation | How to use|
-| :---------------: | :-----------------:  | :---------------: |
-|     dji-sdk-v5-aircraft      | Aircraft main package, which provides support for MSDK to control the aircraft. | implementation 'com.dji:dji-sdk-v5-aircraft:{sdkVersion}' |
-| dji-sdk-v5-aircraft-provided | Aircraft compilation package, which provides interfaces related to the aircraft package. | compileOnly 'com.dji:dji-sdk-v5-aircraft-provided:{sdkVersion}' |
-| dji-sdk-v5-networkImp | Network library package, which provides network connection ability for MSDK. Without this dependency, all network functions of MSDK will not work, but the interfaces of hardware control can be used normally. | runtimeOnly 'com.dji:dji-sdk-v5-networkImp:{sdkVersion}' |
-
-- If only the aircraft product is in need to support, please use:
-
-  ```groovy
-  implementation 'com.dji:dji-sdk-v5-aircraft:{sdkVersion}'
-  compileOnly 'com.dji:dji-sdk-v5-aircraft-provided:{sdkVersion}'
-  ```
-  
-- If the MSDK have to use network(required by default), please use:
-  ```groovy
-  runtimeOnly 'com.dji:dji-sdk-v5-networkImp:{sdkVersion}'
-  ```
-
-
-
-## Support
-
-You can get support from DJI with the following method:
-
-- Post questions in DJI Developer Forums: [**DEVELOPER SUPPORT**](https://djisdksupport.zendesk.com/hc/en-us/community/topics)
+## SORA / BVLOS Relevance
+This project directly addresses SORA C2 link reliability requirements:
+- Latency KPI maps to command response time requirements
+- Reconnect KPI maps to acceptable loss-of-link duration
+- Data completeness maps to navigation integrity assurance
+- Buffer recovery ensures no telemetry gaps during link degradation
