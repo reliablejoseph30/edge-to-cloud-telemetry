@@ -1,92 +1,203 @@
- Edge-to-Cloud Telemetry Trustworthiness
+# Edge-to-Cloud Telemetry Trustworthiness
+
 **COMP11134 Collaborative Group Project — Group 4**
 
-## Team
-| Name				| Role |
-|------				|------|
-| Craig Rutherford 		| System Architecture & Validation Lead |
-| Joseph Toba (Oloruntoba) 	| MSDK & App Implementation Lead |
-| Yassin Ginawi 		| Network & Transmission Lead |
+---
 
-## Project Description
-An end-to-end drone telemetry pipeline that streams live state data from a DJI Mini 4 Pro
-to a remote server and measures performance under degraded network conditions.
-The emphasis is on communication resilience and reliability in BVLOS & SORA contexts.
+## 👥 Team
 
-## System Architecture
+| Name                     | Role                                  |
+| ------------------------ | ------------------------------------- |
+| Craig Rutherford         | System Architecture & Validation Lead |
+| Joseph Toba (Oloruntoba) | MSDK & App Implementation Lead        |
+| Yassin Ginawi            | Network & Transmission Lead           |
 
-DJI Mini 4 Pro → RC-N3 Controller → Android (MSDK App) → Network → Flask Server → Analysis
+---
 
-## Features Implemented
-- ✅ Live telemetry extraction via DJI MSDK v5 (GPS, attitude, battery)
-- ✅ Millisecond timestamping on every packet
-- ✅ Sequence numbering for packet loss detection
-- ✅ HTTP transmission to remote Flask server
-- ✅ Local CSV file saving (telemetry_log.csv)
-- ✅ Packet loss calculator
-- ✅ Local buffer during network disconnection
-- ✅ Buffer drain on reconnection with duration logging
-- ✅ RC signal quality monitoring (AirLinkKey)
-- ✅ RC disconnect/reconnect event logger (rc_events.csv)
-- ✅ Network monitor (ConnectivityManager)
-- ✅ Session summary logger
-- ✅ Live telemetry dashboard UI
+## 📌 Project Overview
 
-## KPIs
-| KPI | Threshold |
-|-----|-----------|
-| End-to-End Latency | ≤ 300ms normal, ≤ 500ms degraded |
-| Packet Loss | ≤ 2% normal, ≤ 5% degraded |
-| Reconnect Time | ≤ 15 seconds |
-| Data Completeness | ≥ 98% |
-| Buffer Recovery Success | ≥ 99% |
+This project implements an end-to-end drone telemetry pipeline that streams live state data from a **DJI Mini 4 Pro** to a remote server.
 
-## Project Structure
+The system is designed to evaluate communication **reliability, resilience, and trustworthiness** under degraded network conditions, with particular focus on **BVLOS (Beyond Visual Line of Sight)** and **SORA (Specific Operations Risk Assessment)** requirements.
 
+---
+
+## 🎯 Objectives
+
+* Build a real-time telemetry pipeline from drone → cloud
+* Measure system performance under unstable network conditions
+* Ensure reliable data transmission with minimal loss
+* Evaluate system against defined KPIs for safety-critical operations
+
+---
+
+## 🏗️ System Architecture
+
+```
+DJI Mini 4 Pro 
+   → RC-N3 Controller 
+   → Android Device (MSDK App) 
+   → Network (WiFi/4G) 
+   → Flask Server 
+   → Data Analysis
+```
+
+---
+
+## ⚙️ Technologies Used
+
+* DJI MSDK v5
+* Android (Kotlin)
+* Python
+* Flask
+* Networking APIs (ConnectivityManager)
+
+---
+
+## 🚀 Features Implemented
+
+* Live telemetry extraction (GPS, attitude, battery)
+* Millisecond timestamping for each data packet
+* Sequence numbering for packet loss detection
+* HTTP transmission to remote Flask server
+* Local CSV logging (`telemetry_log.csv`)
+* Packet loss calculation
+* Network disconnection buffering
+* Automatic buffer recovery on reconnection
+* RC signal quality monitoring (AirLinkKey)
+* RC disconnect/reconnect event logging (`rc_events.csv`)
+* Network state monitoring
+* Session summary logging
+* Live telemetry dashboard UI
+
+---
+
+## 📊 Key Performance Indicators (KPIs)
+
+| KPI                     | Threshold                            |
+| ----------------------- | ------------------------------------ |
+| End-to-End Latency      | ≤ 300ms (normal), ≤ 500ms (degraded) |
+| Packet Loss             | ≤ 2% (normal), ≤ 5% (degraded)       |
+| Reconnect Time          | ≤ 15 seconds                         |
+| Data Completeness       | ≥ 98%                                |
+| Buffer Recovery Success | ≥ 99%                                |
+
+---
+
+## 📂 Project Structure
+
+```
 SampleCode-V5/android-sdk-v5-sample/src/main/java/dji/sampleV5/aircraft/
-├── TelemetryManager.kt          # Core telemetry extraction, buffering, CSV logging
-├── NetworkMonitor.kt            # Network state detection
-├── TelemetryDashboardActivity.kt # Live telemetry UI dashboard
-└── DJIMainActivity.kt           # Main activity, SDK registration
+├── TelemetryManager.kt              # Core telemetry logic, buffering, CSV logging
+├── NetworkMonitor.kt                # Network state detection
+├── TelemetryDashboardActivity.kt   # Live telemetry dashboard UI
+└── DJIMainActivity.kt              # SDK initialization & main activity
+
 SampleCode-V5/android-sdk-v5-sample/src/main/res/layout/
-└── activity_telemetry_dashboard.xml  # Dashboard UI layout
+└── activity_telemetry_dashboard.xml
+
 server/
-└── server.py                    # Flask server
+└── server.py                       # Flask server for telemetry reception
+```
 
+---
 
+## 🛠️ Setup Instructions
 
-## Setup Instructions
+### 🔹 Android Application
 
-### Android App
-1. Clone the repository
-2. Copy `gradle.properties`, `local.properties` and `msdkkeystore.jks` from the original project (not committed for security)
-3. Open `SampleCode-V5/android-sdk-v5-as` in Android Studio
-4. Update the server IP in `TelemetryManager.kt` to match your server
-5. Build and run on Android device
+1. Clone the repository:
 
-### Flask Server
+   ```
+   git clone https://github.com/reliablejoseph30/edge-to-cloud-telemetry
+   ```
+
+2. Copy required configuration files:
+
+   * `gradle.properties`
+   * `local.properties`
+   * `msdkkeystore.jks`
+     *(Not included for security reasons)*
+
+3. Open project in Android Studio:
+
+   ```
+   SampleCode-V5/android-sdk-v5-as
+   ```
+
+4. Update server IP in:
+
+   ```
+   TelemetryManager.kt
+   ```
+
+5. Build and deploy to Android device
+
+---
+
+### 🔹 Flask Server
+
 ```bash
 cd server
 pip install flask
 python3 server.py
 ```
-Server runs on port 5000. Receives POST requests at `/telemetry`.
 
-### Pull CSV Evidence
+* Server runs on: `http://localhost:5000`
+* Endpoint: `/telemetry`
+
+---
+
+### 📥 Retrieve Logged Data
+
 ```bash
 adb pull /sdcard/Android/data/com.example.dronegroup/files/telemetry_log.csv
 adb pull /sdcard/Android/data/com.example.dronegroup/files/rc_events.csv
 ```
 
-## Hardware
-- DJI Mini 4 Pro Drone
-- DJI RC-N3 Controller
-- Android Device
-- Ubuntu Linux Development Machine
+---
 
-## SORA / BVLOS Relevance
-This project directly addresses SORA C2 link reliability requirements:
-- Latency KPI maps to command response time requirements
-- Reconnect KPI maps to acceptable loss-of-link duration
-- Data completeness maps to navigation integrity assurance
-- Buffer recovery ensures no telemetry gaps during link degradation
+## 🧰 Hardware Used
+
+* DJI Mini 4 Pro Drone
+* DJI RC-N3 Controller
+* Android Device
+* Ubuntu Development Machine
+
+---
+
+## 🛫 SORA / BVLOS Relevance
+
+This project directly addresses critical **Command & Control (C2) link reliability** requirements:
+
+* **Latency KPI** → Command response time
+* **Reconnect Time** → Acceptable link loss duration
+* **Data Completeness** → Navigation integrity
+* **Buffer Recovery** → Prevents telemetry gaps during disconnection
+
+---
+
+## 🔮 Future Improvements
+
+* Integration with ROS2 / PX4 telemetry streams
+* Real-time cloud dashboard visualization
+* Advanced fault-tolerant communication protocols
+* AI-based anomaly detection on telemetry data
+
+---
+
+## 📌 Project Status
+
+🚧 Work in Progress — Core telemetry pipeline and reliability mechanisms implemented. Ongoing testing and optimization under varied network conditions.
+
+---
+
+## 👤 Author Contribution (Joseph Toba)
+
+* Implemented telemetry extraction using DJI MSDK
+* Developed buffering and recovery logic
+* Designed telemetry logging system (CSV + timestamps)
+* Built real-time telemetry dashboard UI
+* Integrated communication between mobile app and server
+
+---
