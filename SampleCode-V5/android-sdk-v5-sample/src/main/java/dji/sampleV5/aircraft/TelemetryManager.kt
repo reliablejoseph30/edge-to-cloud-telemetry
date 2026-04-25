@@ -89,7 +89,7 @@ object TelemetryManager {
             }
         }
 
-        // Attitude
+        // Attitude — now also triggers packet sending
         KeyManager.getInstance().listen(
             KeyTools.createKey(FlightControllerKey.KeyAircraftAttitude), this
         ) { oldValue: Attitude?, newValue: Attitude? ->
@@ -98,6 +98,7 @@ object TelemetryManager {
                 pitch = newValue.pitch
                 yaw = newValue.yaw
                 Log.d(TAG, "Attitude → Roll: $roll, Pitch: $pitch, Yaw: $yaw")
+                handleNewPacket() // ← Added: trigger packet on every attitude update
             }
         }
 
@@ -143,11 +144,11 @@ object TelemetryManager {
         }
     }
 
-    // ── Packet handling with csv save ───────────────────────────────────────────────────
+    // ── Packet handling with csv save ─────────────────────────────────────
     private fun handleNewPacket() {
         val packet = buildPacket()
-        saveToCSV(packet) // Always save locally regardless of network>> Added
-        calculatePacketLoss(packet.seq) // added to calculate packet loss during network failure
+        saveToCSV(packet)
+        calculatePacketLoss(packet.seq)
         if (isNetworkAvailable) {
             sendPacket(packet)
         } else {
@@ -156,18 +157,18 @@ object TelemetryManager {
         }
     }
 
-    // ── Send packet function to Yassin's server (HTTP) ───────────────────────────────────────────────────────
+    // ── Send packet to server (HTTP POST) ─────────────────────────────────
     private fun sendPacket(packet: TelemetryPacket) {
         Log.d(TAG, "SENT seq=${packet.seq} | Signal: ${packet.signalQuality}% | ${packet.toJson()}")
         Thread {
             try {
-                val url = java.net.URL("http://10.66.73.250:5000/telemetry")
+                val url = java.net.URL("http://192.168.1.85:5000/telemetry")
                 val conn = url.openConnection() as java.net.HttpURLConnection
                 conn.requestMethod = "POST"
                 conn.setRequestProperty("Content-Type", "application/json")
                 conn.doOutput = true
-                conn.connectTimeout = 3000
-                conn.readTimeout = 3000
+                conn.connectTimeout = 5000
+                conn.readTimeout = 5000
                 conn.outputStream.write(packet.toJson().toByteArray())
                 val responseCode = conn.responseCode
                 Log.d(TAG, "HTTP response: $responseCode seq=${packet.seq}")
@@ -179,7 +180,7 @@ object TelemetryManager {
         }.start()
     }
 
-    // ── Network state management to monitor when network fails and reconnects ──────────────────────────────────────────
+    // ── Network state management ──────────────────────────────────────────
     fun onNetworkLost() {
         isNetworkAvailable = false
         disconnectTimestamp = System.currentTimeMillis()
@@ -195,7 +196,7 @@ object TelemetryManager {
         } else {
             Log.d(TAG, "NETWORK RESTORED — initial connection | Buffer size: ${buffer.size}")
         }
-        reconnectCount++ //count reconnects >>> Added
+        reconnectCount++
         Log.d(TAG, "RECONNECT #$reconnectCount")
         disconnectTimestamp = 0L
         Thread { drainBuffer() }.start()
@@ -232,6 +233,7 @@ object TelemetryManager {
     }
 
     fun getBufferSize(): Int = buffer.size
+
     // ── Packet Loss Calculator ────────────────────────────────────────────
     private fun calculatePacketLoss(seq: Int) {
         totalPackets++
@@ -257,17 +259,16 @@ object TelemetryManager {
         Log.d(TAG, "Reconnect count: $reconnectCount")
         Log.d(TAG, "Buffer size at end: ${buffer.size}")
         Log.d(TAG, "═══════════════════════════════")
-
     }
 
     fun stopListening() {
         KeyManager.getInstance().cancelListen(this)
         Log.d(TAG, "TelemetryManager stopped.")
     }
-    // ── Adding CSV file & Context ─────────────────────────────────────────────────────
+
+    // ── CSV initialisation ────────────────────────────────────────────────
     fun init(context: Context) {
         appContext = context.applicationContext
-        // Write CSV header if file doesn't exist
         val file = File(context.getExternalFilesDir(null), "telemetry_log.csv")
         if (!file.exists()) {
             file.writeText("seq,timestamp,lat,lon,alt,roll,pitch,yaw,battery,signal_quality,rc_connected\n")
@@ -283,6 +284,7 @@ object TelemetryManager {
             Log.e(TAG, "CSV save error: ${e.message}")
         }
     }
+
     // ── RC Event Logger ───────────────────────────────────────────────────
     private fun saveRCEventToCSV(event: String, timestamp: Long) {
         try {

@@ -157,13 +157,12 @@ abstract class DJIMainActivity : AppCompatActivity() {
         msdkManagerVM.lvProductConnectionState.observe(this) { resultPair ->
             showToast("Product: ${resultPair.second} ,ConnectionState:  ${resultPair.first}")
             Log.d("DJI_CONNECT", "Connection fired: ${resultPair.first}")
-            if (resultPair.first == false) {
+            if (resultPair.first == true) {
                 Log.d("DJI_CONNECT", "Starting telemetry now!")
-                NetworkMonitor.start(this)
                 TelemetryManager.init(this)
                 TelemetryManager.startListening()
-                val intent = android.content.Intent(this, TelemetryDashboardActivity::class.java)
-                startActivity(intent)
+               // val intent = android.content.Intent(this, TelemetryDashboardActivity::class.java)
+               // startActivity(intent)
             }
         }
 
